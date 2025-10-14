@@ -1,0 +1,109 @@
+---
+title: "Using the MUMARINEX Package"
+author: "Nathan Chauvel"
+ate: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using the MUMARINEX Package}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+The ***mumarinex*** package provides tools for the computation of the **MUltivariate MArine Recovery INdEX (MUMARINEX)** as described in Chauvel *et al.* (2025). This index is designed to evaluate community recovery in marine ecosystems by combining three complementary sub-indices:
+
+-   **Corrected Shared Richness (CSR)**: community richness changes (taxa loss or gain)
+-   **Corrected Bray Curtis Distance**: community structure changes (decrease or increase in abundance)
+-   **Corrected Pielou Index**: community dominance shifts (appearance or changes in dominance)
+
+The package also includes diagnostic and visualization functions to identify which taxa or ecological mechanisms drive the observed variations.
+
+In this vignette, we will observe how to:
+
+1.  Install and load the package.
+2.  Format data.
+3.  Compute the MUMARINEX index and its sub-indices (CSR, CBCD and CPI).
+4.  Visualize sub-indices results with dedicated plotting functions.
+5.  Generate diagnostics to interpret sub-indices variations.
+
+All examples below use the dataset **`Simulated_data`**, included in the package.\
+For details on how this dataset was constructed, please refer to its documentation page (`?Simulated_data`)
+
+# Install and load the package
+
+The package comes with a simulated dataset (`Simulated_data`) designed to illustrate different ecological impact scenarios.
+
+```{r load-data, message=FALSE}
+
+# Install from CRAN
+# install.packages("mumarinex") # run the first time only
+# Load the package
+library(mumarinex)
+```
+
+# Data format
+
+The input data must be provided as a data frame or matrix, with rows representing samples and columns representing species. A reference vector specifying the reference samples must also be supplied. The formatting of Simulated_data can be used as a template for preparing your own dataset. In this example, the reference stations (REF1, REF2) are located in rows 41 to 50. The example dataset can be loaded into the R environment as follows:
+
+```{r}
+# Load example dataset
+data("Simulated_data")
+
+# Display the first rows
+head(Simulated_data)
+
+# Definition of the reference position
+ref_idx <- 41:50 # row number of the reference samples
+```
+
+# Compute the MUMARINEX index and its sub-indices (CSR, CBCD and CPI)
+
+Once the data are properly defined, the MUMARINEX index and its sub-indices can be computed. The function `mumarinex()` calculates the MUMARINEX index, and by setting `subindices = TRUE`, it also returns the three complementary sub-indices.
+
+```{r}
+# Compute MUMARINEX and sub-indices
+rMUM <- mumarinex(x = Simulated_data, ref = ref_idx, subindices = TRUE)
+
+# Extract MUMARINEX
+rMUMARINEX<-rMUM$MUMARINEX
+
+# Extract sub-indices
+Subind<-rMUM$Subindices
+```
+
+MUMARINEX results can subsequently be examined through graphical representations, such as boxplots.
+
+```{r,fig.width=7, fig.height=5}
+stations<-matrix(unlist(strsplit(rownames(Simulated_data),".",fixed=TRUE)),ncol=2,byrow=TRUE)[,1] # get station labels from data rownames
+
+stations<-factor(stations,levels=unique(stations)) # setting station names as factor to specify in which order it must display it in the boxplot
+
+boxplot(rMUMARINEX~stations,ylim=c(0,1)) # ylim is set in the interval 0-1 as it is the maximum range of MUMARINEX
+```
+
+# Visualize sub-indices results with dedicated plotting functions
+
+To better understand the variations in MUMARINEX, it is often useful to examine how the sub-indices vary. The `decomplot()` function displays the distribution of these sub-indices (CSR, CBCD, CPI) across sample groups using boxplots.
+
+```{r,fig.width=10, fig.height=5}
+
+decomplot(x = Simulated_data, g = stations, ref = ref_idx, main = "Artificial data")
+```
+
+# Generate diagnostics to interpret sub-indices variations
+
+Once the sub-index variations underlying the final MUMARINEX value have been examined, the `diagnostic_tool()` function can be used to identify the species that best account for these changes.
+
+```{r}
+diagnostic_tool(x = Simulated_data, g = stations, ref = ref_idx)
+```

@@ -1,0 +1,17 @@
+a1ddbaf5a695bbaa542bd80f5c44a8e4 *DESCRIPTION
+26762a74d7fb2fb228efe2bbc4d7a583 *NAMESPACE
+ca7993a61bc0f5cdc6a468edf4d8bf2a *NEWS.md
+59660eba1a5b4007a9542b362d9c97aa *R/Simulated_data.R
+c09921f25512d633827321af81b8d030 *R/decomplot.R
+099796017a40530ab923aa48adcd0242 *R/diagnostic_tool.R
+868a7d3a213cd8162d07d5032c325906 *R/mumarinex.R
+0b4b79c98808aea5574ec402c0fb6e8e *build/vignette.rds
+0f6a767d83b88ef9145e7bb3825a08bc *data/Simulated_data.rda
+ff343c039ef1106bf597ab4e807bba63 *inst/doc/Using-the-MUMARINEX-Package.R
+81f8a2da034ad5fc976c28f76ca8c81c *inst/doc/Using-the-MUMARINEX-Package.Rmd
+bed1d7bd62e877a02a2665711f02939c *inst/doc/Using-the-MUMARINEX-Package.html
+0015220316561ffa6bc5979f08e1606b *man/Simulated_data.Rd
+1e871d3f2f6710489252340919463e91 *man/decomplot.Rd
+b5dae0c0c89f3a6276d0ae459327c177 *man/diagnostic_tool.Rd
+ef122b66a9bf940024affe9927215e3b *man/mumarinex.Rd
+81f8a2da034ad5fc976c28f76ca8c81c *vignettes/Using-the-MUMARINEX-Package.Rmd
