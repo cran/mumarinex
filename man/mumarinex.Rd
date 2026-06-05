@@ -4,30 +4,32 @@
 \alias{mumarinex}
 \title{MUMARINEX and subindices computation}
 \usage{
-mumarinex(x, ref, subindices = FALSE)
+mumarinex(x, ref, subindices = FALSE, log = TRUE)
 }
 \arguments{
 \item{x}{A data frame or a matrix organized with samples in rows and species in columns.}
 
 \item{ref}{A logical or numeric vector identifying the reference row positions.}
 
-\item{subindices}{A logical indicating whether the sub-indices (CSR, CBCD, and CPI) should be returned.}
+\item{subindices}{A logical indicating whether the sub-indices (SCSR, CBCS, and SPI) should be returned.}
+
+\item{log}{A logical indicating whether the data must be log transformed.}
 }
 \value{
-A data frame with the MUMARINEX values. When subindices = TRUE, an additional data frame is returned containing the results of the sub-indices (CSR, CBCD, and CPI).
+A data frame with the MUMARINEX values. When subindices = TRUE, an additional data frame is returned containing the results of the sub-indices (SCSR, CBCS, and SPI).
 }
 \description{
-Computes the MUMARINEX index and its sub-indices (CSR, CBCD, and CPI), following the method described in Chauvel et al. (2025).
+Computes the MUMARINEX index and its sub-indices (SCSR, CBCS, and SPI), following the method described in Chauvel et al. (2026).
 }
 \details{
 mumarinex
 }
 \examples{
 data("Simulated_data")
-ref_idx<-41:50
-mumarinex(x=Simulated_data,ref=ref_idx)
-mumarinex(x=Simulated_data,ref=ref_idx,subindices=TRUE)
+ref_idx<-1:10
+mumarinex(x=Simulated_data,ref=ref_idx,log=FALSE)
+mumarinex(x=Simulated_data,ref=ref_idx,subindices=TRUE,log=FALSE)
 }
 \references{
-Chauvel, N., Pezy, J.P., Grall, J., Thiébaut, E. (2025). A general-purpose Multivariate Marine Recovery Index for quantifying the influence of human activities on benthic habitat ecological status. Ecological Indicator.
+Chauvel, N., Pezy, J.P., Grall, J., Thiébaut, E. (2026). A general-purpose Multivariate Marine Recovery Index for quantifying the influence of human activities on benthic habitat ecological status. Ecological Indicator.
 }

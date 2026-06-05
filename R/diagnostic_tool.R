@@ -13,10 +13,11 @@
 #' @param x A data frame or a matrix organized with samples in rows and species in columns.
 #' @param g A vector of length \code{nrow(x)} indicating how the samples should be grouped (e.g., stations, treatments).
 #' @param ref A logical or numeric vector identifying the reference row positions.
+#' @param log A logical indicating whether the data must be log transformed.
 #' @param signif_test Logical; if TRUE, only sub-indices significantly lower than the reference conditions (t-test, p < 0.05) are returned. Conditions that are not statistically significant are indicated by 'ns'.
 #' @param mute A logical indicating whether the results are displayed in the console.
 #'
-#' @returns A data frame summarizing the key information explaining variations in CSR, CBCD, and CPI.
+#' @returns A data frame summarizing the key information explaining variations in SCSR, CBCS, and SPI.
 #' @export
 #'
 #' @importFrom stats sd
@@ -27,10 +28,10 @@
 #'
 #' @examples
 #' data("Simulated_data")
-#' ref_idx<-41:50
+#' ref_idx<-1:10
 #' stations<-matrix(unlist(strsplit(rownames(Simulated_data),".",fixed=TRUE)),ncol=2,byrow=TRUE)[,1]
-#' diagnostic_tool(x=Simulated_data,g=stations,ref=ref_idx)
-diagnostic_tool<-function(x,g,ref,signif_test=TRUE,mute=FALSE){
+#' diagnostic_tool(x=Simulated_data,g=stations,ref=ref_idx,log=FALSE)
+diagnostic_tool<-function(x,g,ref,log=TRUE,signif_test=TRUE,mute=FALSE){
 
   if(!(is.data.frame(x)||is.matrix(x))){
     stop("'x' must be a data frame or a matrix.")
@@ -68,7 +69,7 @@ diagnostic_tool<-function(x,g,ref,signif_test=TRUE,mute=FALSE){
     stop("'mute' must be a single logical value (TRUE or FALSE).")
   }
 
-  subind<-mumarinex(x,ref,T)$subindices
+  subind<-mumarinex(x,ref,T,log=log)$subindices
 
   ref_fact<-rep(NA,nrow(subind));ref_fact[ref]<-"R";ref_fact[-ref]<-as.character(g[-ref]);ref_fact<-factor(ref_fact)
   ref_fact<-ref_fact[-ref]
@@ -78,48 +79,49 @@ diagnostic_tool<-function(x,g,ref,signif_test=TRUE,mute=FALSE){
 
   if(signif_test==T){
 
-    pCSR<-data.frame(NULL)
+    pSCSR<-data.frame(NULL)
     for(i in seq(unique(ref_fact))){
       station<-as.character(unique(ref_fact)[i])
-      if(sd(subind$CSR[ref_fact==unique(ref_fact)[i]])!=0)
-      {p<-t.test(subind$CSR[ref_fact==unique(ref_fact)[i]],subind$CSR[ref],alternative = "less")$p.value}else{p<-1}
+      if(sd(subind$SCSR[ref_fact==unique(ref_fact)[i]])!=0)
+      {p<-t.test(subind$SCSR[ref_fact==unique(ref_fact)[i]],subind$SCSR[ref],alternative = "less")$p.value}else{
+        ifelse(unique(subind$SCSR[ref_fact==unique(ref_fact)[i]])==unique(subind$SCSR[ref]),p<-1,p<-0)}
       lin<-c(station,p)
-      pCSR<-rbind(pCSR,lin)
-      colnames(pCSR)<-c("station","p")
-      pCSR$p<-as.numeric(pCSR$p)
+      pSCSR<-rbind(pSCSR,lin)
+      colnames(pSCSR)<-c("station","p")
+      pSCSR$p<-as.numeric(pSCSR$p)
     }
 
-    pCBCD<-data.frame(NULL)
+    pCBCS<-data.frame(NULL)
     for(i in seq(unique(ref_fact))){
       station<-as.character(unique(ref_fact)[i])
-      if(sd(subind$CBCD[ref_fact==unique(ref_fact)[i]])!=0)
-      {p<-t.test(subind$CBCD[ref_fact==unique(ref_fact)[i]],subind$CBCD[ref],alternative = "less")$p.value}else{p<-1}
+      if(sd(subind$CBCS[ref_fact==unique(ref_fact)[i]])!=0)
+      {p<-t.test(subind$CBCS[ref_fact==unique(ref_fact)[i]],subind$CBCS[ref],alternative = "less")$p.value}else{p<-1}
       lin<-c(station,p)
-      pCBCD<-rbind(pCBCD,lin)
-      colnames(pCBCD)<-c("station","p")
-      pCBCD$p<-as.numeric(pCBCD$p)
+      pCBCS<-rbind(pCBCS,lin)
+      colnames(pCBCS)<-c("station","p")
+      pCBCS$p<-as.numeric(pCBCS$p)
     }
 
-    pCPI<-data.frame(NULL)
+    pSPI<-data.frame(NULL)
     for(i in seq(unique(ref_fact))){
       station<-as.character(unique(ref_fact)[i])
-      if(sd(subind$CPI[ref_fact==unique(ref_fact)[i]])!=0)
-      {p<-t.test(subind$CPI[ref_fact==unique(ref_fact)[i]],subind$CPI[ref],alternative = "less")$p.value}else{p<-1}
+      if(sd(subind$SPI[ref_fact==unique(ref_fact)[i]])!=0)
+      {p<-t.test(subind$SPI[ref_fact==unique(ref_fact)[i]],subind$SPI[ref],alternative = "less")$p.value}else{p<-1}
       lin<-c(station,p)
-      pCPI<-rbind(pCPI,lin)
-      colnames(pCPI)<-c("station","p")
-      pCPI$p<-as.numeric(pCPI$p)
+      pSPI<-rbind(pSPI,lin)
+      colnames(pSPI)<-c("station","p")
+      pSPI$p<-as.numeric(pSPI$p)
     }
 
   }else{
-    pCSR<-data.frame(station=unique(ref_fact),p=0)
-    pCBCD<-data.frame(station=unique(ref_fact),p=0)
-    pCPI<-data.frame(station=unique(ref_fact),p=0)
+    pSCSR<-data.frame(station=unique(ref_fact),p=0)
+    pCBCS<-data.frame(station=unique(ref_fact),p=0)
+    pSPI<-data.frame(station=unique(ref_fact),p=0)
   }
 
-  CSR_df<-NULL
+  SCSR_df<-NULL
 
-  if(min(pCSR$p)<0.05){
+  if(min(pSCSR$p)<0.05){
 
     xref<-x[ref_idx,which(colSums(x[ref_idx,])>0)]
     ref_specif<-apply(xref,2,function(x){sum(x>0)/length(x)});ref_fidel<-colSums(xref)/sum(xref);indval_ref<-ref_specif*ref_fidel
@@ -130,7 +132,7 @@ diagnostic_tool<-function(x,g,ref,signif_test=TRUE,mute=FALSE){
 
       station<-as.character(unique(g[test_idx])[i])
 
-      if(pCSR[which(pCSR$station==station),"p"]<0.05|signif_test==F){
+      if(pSCSR[which(pSCSR$station==station),"p"]<0.05|signif_test==F){
 
         df<-x[which(g==station),]
 
@@ -146,127 +148,146 @@ diagnostic_tool<-function(x,g,ref,signif_test=TRUE,mute=FALSE){
         }
 
         sp_missing_raw<-setdiff(ref_sp,station_sp)
+        sp_new_raw<-setdiff(station_sp,ref_sp)
+        sp_diff_taxa_raw<-c(sp_missing_raw,sp_new_raw)
 
-        missing<-NULL
+        diff_taxa<-NULL
         for(j in 1:length(unique(g[ref_idx]))){
           df_ref<-x[which(g==unique(g[ref])[j]),]
           df_ref<-df_ref[,which(colSums(df_ref)>0)]
           ref_temp_sp<-names(df_ref)
           sp_missing_temp<-setdiff(ref_temp_sp,station_sp)
-          missing<-c(missing,length(sp_missing_temp))
+          sp_new_temp<-setdiff(station_sp,ref_temp_sp)
+          sp_diff<-c(sp_missing_temp,sp_new_temp)
+          diff_taxa<-c(diff_taxa,length(sp_diff))
         }
 
-        new_species<-head(sp_new,5);new_species[5]<-NA;new_species[6]<-"----------------------";new_species[is.na(new_species)]<-"/"
+        new_species<-head(sp_new,5);new_species[6]<-NA;new_species[6]<-"----------------------";new_species[is.na(new_species)]<-"/"
         Station<-rep("",5);Station[3]<-station;Station[6]<-"------"
-        Mean_missing<-rep("",5);Mean_missing[3]<-round(mean(missing),1);Mean_missing[6]<-"------";Mean_missing[is.na(Mean_missing)]<-"/"
-        N_missing<-rep("",5);N_missing[3]<-length(sp_missing_raw);N_missing[6]<-"------";N_missing[is.na(N_missing)]<-"/"
+        Mean_diff_taxa<-rep("",5);Mean_diff_taxa[3]<-round(mean(diff_taxa),1);Mean_diff_taxa[6]<-"------";Mean_diff_taxa[is.na(Mean_diff_taxa)]<-"/"
+        N_diff_taxa<-rep("",5);N_diff_taxa[3]<-length(sp_diff_taxa_raw);N_diff_taxa[6]<-"------";N_diff_taxa[is.na(N_diff_taxa)]<-"/"
         Missing_species<-head(sp_missing_raw,5);Missing_species[6]<-"----------------------";Missing_species[is.na(Missing_species)]<-"/"
 
-        lin<-data.frame(Sample=Station,Raw=N_missing,Mean=Mean_missing,Missing_species=Missing_species,New_species=new_species)
-        CSR_df<-rbind(CSR_df,lin);rownames(CSR_df)<-NULL
+        lin<-data.frame(Sample=Station,Raw=N_diff_taxa,Mean=Mean_diff_taxa,Missing_species=Missing_species,New_species=new_species)
+        SCSR_df<-rbind(SCSR_df,lin);rownames(SCSR_df)<-NULL
 
       }else{
 
         new_species<-"ns";new_species[2]<-"----------------------"
         Station<-station;Station[2]<-"------"
-        Mean_missing<-"ns";Mean_missing[2]<-"------"
-        N_missing<-"ns";N_missing[2]<-"------"
+        Mean_diff_taxa<-"ns";Mean_diff_taxa[2]<-"------"
+        N_diff_taxa<-"ns";N_diff_taxa[2]<-"------"
         Missing_species<-"ns";Missing_species[2]<-"----------------------"
 
-        lin<-data.frame(Sample=Station,Raw=N_missing,Mean=Mean_missing,Missing_species=Missing_species,New_species=new_species)
-        CSR_df<-rbind(CSR_df,lin)
+        lin<-data.frame(Sample=Station,Raw=N_diff_taxa,Mean=Mean_diff_taxa,Missing_species=Missing_species,New_species=new_species)
+        SCSR_df<-rbind(SCSR_df,lin)
       }
     }
 
   }else{
 
-    CSR_df<-data.frame(Sample="ns",Raw="ns",Mean="ns",Missing_species="ns",New_species="ns")
+    SCSR_df<-data.frame(Sample="ns",Raw="ns",Mean="ns",Missing_species="ns",New_species="ns")
   }
 
   if(mute==F){
     cat("\n","|-----------------------------------------------------------------------------------|","\n",sep="")
-    cat("|--------------------------------- CSR  diagnostic ---------------------------------|","\n")
+    cat("|--------------------------------- SCSR  diagnostic --------------------------------|","\n")
     cat("|-----------------------------------------------------------------------------------|","\n")
     cat("> Raw: Raw taxa difference between sample and reference pool","\n")
     cat("> Mean: Mean taxa difference between sample and reference pool","\n")
-    cat("> Missing_species: Top 5 missing species (sorted by IndVal of the reference)","\n")
+    cat("> Missing_species: Top 5 diff_taxa species (sorted by IndVal of the reference)","\n")
     cat("> New_species: Top 5 new species (sorted by IndVal of the sample)","\n")
-    print(kable(CSR_df,caption="CSR diagnostic",format="simple"))
+    print(kable(SCSR_df,caption="SCSR diagnostic",format="simple"))
   }
 
-  if(min(pCBCD$p)<0.05){
+  if(min(pCBCS$p)<0.05){
 
     xref<-x[ref_idx,]
 
-    CBCD_df<-NULL
+    CBCS_df<-NULL
 
     for(i in seq(unique(g[test_idx]))){
 
       station<-as.character(unique(g[test_idx])[i])
 
-      if(pCBCD[which(pCBCD$station==station),"p"]<0.05|signif_test==F){
+      if(pCBCS[which(pCBCS$station==station),"p"]<0.05|signif_test==F){
 
         df<-x[which(g==station),]
 
         moy_diff_ab<-NULL
+        moy_diff_rel<-NULL
+
         for(c in 1:ncol(df)){
           moy_diff_c<-mean(outer(df[,c],xref[,c],function(x,y)x-y))
+          moy_diff_rel_c<-(mean(df[,c])/mean(xref[,c])*100)-100
+
           moy_diff_ab<-c(moy_diff_ab,moy_diff_c)
+          moy_diff_rel<-c(moy_diff_rel,moy_diff_rel_c)
         }
         names(moy_diff_ab)<-colnames(df)
-        moy_diff_ab_increase<-sort(moy_diff_ab[which(moy_diff_ab>0)],decreasing = T)
-        moy_diff_ab_decrease<-sort(moy_diff_ab[which(moy_diff_ab<0)])
+        names(moy_diff_rel)<-colnames(df)
+
+        moy_diff_rel_increase<-sort(moy_diff_rel[which(moy_diff_rel>0&moy_diff_rel<Inf)],decreasing = T)
+        moy_diff_rel_decrease<-sort(moy_diff_rel[which(moy_diff_rel<0&moy_diff_rel!=(-100))])
+        moy_diff_ab_increase<-moy_diff_ab[names(moy_diff_rel_increase)]
+        moy_diff_ab_decrease<-sort(moy_diff_ab[names(moy_diff_rel_decrease)])
 
         Station<-rep("",5);Station[3]<-station;Station[6]<-"------"
         lower_ab<-head(names(moy_diff_ab_decrease),5);lower_ab[6]<-"----------------------";lower_ab[is.na(lower_ab)]<-"/"
         Mean_abund_decrease<-round(head(moy_diff_ab_decrease,5),1);Mean_abund_decrease[6]<-"------";Mean_abund_decrease[is.na(Mean_abund_decrease)]<-"/"
+        Rel_abund_decrease<-round(head(moy_diff_rel_decrease,5),1);Rel_abund_decrease[6]<-"------";Rel_abund_decrease[is.na(Rel_abund_decrease)]<-"/"
         higher_ab<-head(names(moy_diff_ab_increase),5);higher_ab[6]<-"----------------------";higher_ab[is.na(higher_ab)]<-"/"
         Mean_abund_increase<-round(head(moy_diff_ab_increase,5),1);Mean_abund_increase[6]<-"------";Mean_abund_increase[is.na(Mean_abund_increase)]<-"/"
+        Rel_abund_increase<-round(head(moy_diff_rel_increase,5),1);Rel_abund_increase[6]<-"------";Rel_abund_increase[is.na(Rel_abund_increase)]<-"/"
 
-        lin<-data.frame(Sample=Station,Lower_abundance=lower_ab,Decrease=Mean_abund_decrease,Higher_abundance=higher_ab,Increase=Mean_abund_increase)
-        CBCD_df<-rbind(CBCD_df,lin);rownames(CBCD_df)<-NULL
+        lin<-data.frame(Sample=Station,Lower_abundance=lower_ab,Decrease=Mean_abund_decrease,Relative_D=Rel_abund_decrease,Higher_abundance=higher_ab,Increase=Mean_abund_increase,Relative_I=Rel_abund_increase)
+        CBCS_df<-rbind(CBCS_df,lin);rownames(CBCS_df)<-NULL
 
       }else{
 
         Station<-station<-station;Station[2]<-"------"
         lower_ab<-"ns";lower_ab[2]<-"----------------------"
         Mean_abund_decrease<-"ns";Mean_abund_decrease[2]<-"------"
+        Rel_abund_decrease<-"ns";Rel_abund_decrease[2]<-"------"
         higher_ab<-"ns";higher_ab[2]<-"----------------------"
         Mean_abund_increase<-"ns";Mean_abund_increase[2]<-"------"
+        Rel_abund_increase<-"ns";Rel_abund_increase[2]<-"------"
 
-        lin<-data.frame(Sample=Station,Lower_abundance=lower_ab,Decrease=Mean_abund_decrease,Higher_abundance=higher_ab,Increase=Mean_abund_increase)
-        CBCD_df<-rbind(CBCD_df,lin);rownames(CBCD_df)<-NULL
+        lin<-data.frame(Sample=Station,Lower_abundance=lower_ab,Decrease=Mean_abund_decrease,Relative_D=Rel_abund_decrease,Higher_abundance=higher_ab,Increase=Mean_abund_increase,Relative_I=Rel_abund_increase)
+        CBCS_df<-rbind(CBCS_df,lin);rownames(CBCS_df)<-NULL
       }
     }
 
   }else{
-    CBCD_df<-data.frame(Sample="ns",Lower_abundance="ns",Decrease="ns",Higher_abundance="ns",Increase="ns")
+    CBCS_df<-data.frame(Sample="ns",Lower_abundance="ns",Decrease="ns",Relative_D="ns",Higher_abundance="ns",Increase="ns",Relative_I="ns")
   }
 
   if(mute==F){
     cat("\n","|-----------------------------------------------------------------------------------|","\n",sep="")
-    cat("|--------------------------------- CBCD diagnostic ---------------------------------|","\n")
+    cat("|--------------------------------- CBCS diagnostic ---------------------------------|","\n")
     cat("|-----------------------------------------------------------------------------------|","\n")
     cat("> Lower_abundance: Important reference taxa which present lower abundances","\n")
     cat("> Decrease: Mean decrease (vs reference) of the corresponding taxa","\n")
+    cat("> Relative_D: Relative mean decrease (vs reference) of the corresponding taxa (%)","\n")
     cat("> Higher_abundance: Important reference taxa which present higher abundances","\n")
     cat("> Increase: Mean increase (vs reference) of the corresponding taxa","\n")
+    cat("> Relative_I: Relative mean increase (vs reference) of the corresponding taxa (%)","\n")
 
-    print(kable(CBCD_df,format="simple"))
+    print(kable(CBCS_df,format="simple"))
   }
 
-  if(min(pCPI$p)<0.05|signif_test==F){
+  if(min(pSPI$p)<0.05|signif_test==F){
 
     xref<-x[ref_idx,]
     xref_mean<-colMeans(xref)
 
-    CPI_df<-NULL
+    SPI_df<-NULL
 
     for(i in seq(unique(g[test_idx]))){
 
       station<-as.character(unique(g[test_idx])[i])
 
-      if(pCPI[which(pCPI$station==station),"p"]<0.05|signif_test==F){
+      if(pSPI[which(pSPI$station==station),"p"]<0.05|signif_test==F){
         df<-x[which(g==station),]
         df_corrected<-df-rep(xref_mean,each=nrow(df))
         df_corrected[df_corrected<0]<-0
@@ -275,10 +296,10 @@ diagnostic_tool<-function(x,g,ref,signif_test=TRUE,mute=FALSE){
 
         Station<-rep("",5);Station[3]<-station;Station[6]<-"------"
         domin_sp<-colnames(df_sorted)[1:5];domin_sp[6]<-"----------------------";domin_sp[is.na(domin_sp)]<-"/"
-        contrib<-head((colSums(df_sorted)/sum(df_sorted))*100,5);contrib[6]<-"------";contrib[is.na(contrib)]<-"/"
+        contrib<-round(head((colSums(df_sorted)/sum(df_sorted))*100,5),1);contrib[6]<-"------";contrib[is.na(contrib)]<-"/"
 
         lin<-data.frame(Sample=Station,Dominant_species=domin_sp,Contribution=contrib)
-        CPI_df<-rbind(CPI_df,lin);rownames(CPI_df)<-NULL
+        SPI_df<-rbind(SPI_df,lin);rownames(SPI_df)<-NULL
 
       }else{
 
@@ -287,27 +308,27 @@ diagnostic_tool<-function(x,g,ref,signif_test=TRUE,mute=FALSE){
         contrib<-"ns";contrib[2]<-"------"
 
         lin<-data.frame(Sample=Station,Dominant_species=domin_sp,Contribution=contrib)
-        CPI_df<-rbind(CPI_df,lin)
+        SPI_df<-rbind(SPI_df,lin)
       }
     }
 
   }else{
 
-    CPI_df<-data.frame(Sample="ns",Dominant_species="ns",Contribution="ns")
+    SPI_df<-data.frame(Sample="ns",Dominant_species="ns",Contribution="ns")
 
   }
   if(mute==F){
     cat("\n","|-----------------------------------------------------------------------------------|","\n",sep="")
-    cat("|--------------------------------- CPI  diagnostic ---------------------------------|","\n")
+    cat("|--------------------------------- SPI  diagnostic ---------------------------------|","\n")
     cat("|-----------------------------------------------------------------------------------|","\n")
 
     cat("> Dominant_species: most abundant species (corrected by reference)","\n")
     cat("> Contribution: Taxa contribution (%) to total abundance (corrected by reference)","\n")
 
-    print(kable(CPI_df,caption="CPI diagnostic",format="simple"))
+    print(kable(SPI_df,caption="SPI diagnostic",format="simple"))
   }
 
-  all_diag_results<-list(CSR=CSR_df,CBCD=CBCD_df,CPI=CPI_df)
+  all_diag_results<-list(SCSR=SCSR_df,CBCS=CBCS_df,SPI=SPI_df)
   invisible(all_diag_results)
 }
 

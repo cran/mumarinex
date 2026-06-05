@@ -4,7 +4,7 @@
 \alias{diagnostic_tool}
 \title{Diagnostic tool to identify the key components that best explain the MUMARINEX sub-indices}
 \usage{
-diagnostic_tool(x, g, ref, signif_test = TRUE, mute = FALSE)
+diagnostic_tool(x, g, ref, log = TRUE, signif_test = TRUE, mute = FALSE)
 }
 \arguments{
 \item{x}{A data frame or a matrix organized with samples in rows and species in columns.}
@@ -13,12 +13,14 @@ diagnostic_tool(x, g, ref, signif_test = TRUE, mute = FALSE)
 
 \item{ref}{A logical or numeric vector identifying the reference row positions.}
 
+\item{log}{A logical indicating whether the data must be log transformed.}
+
 \item{signif_test}{Logical; if TRUE, only sub-indices significantly lower than the reference conditions (t-test, p < 0.05) are returned. Conditions that are not statistically significant are indicated by 'ns'.}
 
 \item{mute}{A logical indicating whether the results are displayed in the console.}
 }
 \value{
-A data frame summarizing the key information explaining variations in CSR, CBCD, and CPI.
+A data frame summarizing the key information explaining variations in SCSR, CBCS, and SPI.
 }
 \description{
 Identifies, for each sub-index, the species or taxa that contribute most to its variation.
@@ -31,9 +33,9 @@ To reduce the risk of misleading interpretations, a one-sided significance test 
 }
 \examples{
 data("Simulated_data")
-ref_idx<-41:50
+ref_idx<-1:10
 stations<-matrix(unlist(strsplit(rownames(Simulated_data),".",fixed=TRUE)),ncol=2,byrow=TRUE)[,1]
-diagnostic_tool(x=Simulated_data,g=stations,ref=ref_idx)
+diagnostic_tool(x=Simulated_data,g=stations,ref=ref_idx,log=FALSE)
 }
 \seealso{
 \code{\link[=decomplot]{decomplot()}}

@@ -4,11 +4,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-## ----load-data, message=FALSE-------------------------------------------------
-
-# Install from CRAN
-# install.packages("mumarinex") # run the first time only
-# Load the package
+## -----------------------------------------------------------------------------
 library(mumarinex)
 
 ## -----------------------------------------------------------------------------
@@ -19,11 +15,11 @@ data("Simulated_data")
 head(Simulated_data)
 
 # Definition of the reference position
-ref_idx <- 41:50 # row number of the reference samples
+ref_idx <- 1:10 # row number of the reference samples
 
 ## -----------------------------------------------------------------------------
 # Compute MUMARINEX and sub-indices
-rMUM <- mumarinex(x = Simulated_data, ref = ref_idx, subindices = TRUE)
+rMUM <- mumarinex(x = Simulated_data, ref = ref_idx, subindices = TRUE, log = FALSE)
 
 # Extract MUMARINEX
 rMUMARINEX<-rMUM$MUMARINEX
@@ -36,12 +32,12 @@ stations<-matrix(unlist(strsplit(rownames(Simulated_data),".",fixed=TRUE)),ncol=
 
 stations<-factor(stations,levels=unique(stations)) # setting station names as factor to specify in which order it must display it in the boxplot
 
-boxplot(rMUMARINEX~stations,ylim=c(0,1)) # ylim is set in the interval 0-1 as it is the maximum range of MUMARINEX
+boxplot(rMUMARINEX~stations,ylim=c(0,1)) # ylim is set in the interval 0-1 as it is the range of MUMARINEX
 
 ## ----fig.width=10, fig.height=5-----------------------------------------------
 
-decomplot(x = Simulated_data, g = stations, ref = ref_idx, main = "Artificial data")
+decomplot(x = Simulated_data, g = stations, ref = ref_idx, log = FALSE, main = "Artificial data")
 
 ## -----------------------------------------------------------------------------
-diagnostic_tool(x = Simulated_data, g = stations, ref = ref_idx)
+diagnostic_tool(x = Simulated_data, g = stations, ref = ref_idx, log = FALSE)
 

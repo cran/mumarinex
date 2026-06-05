@@ -9,6 +9,7 @@ decomplot(
   x,
   g,
   ref,
+  log = TRUE,
   fill = c("lightblue", "#FFFFE0DF", "#90F0909E"),
   border = c("#0080AB", "#C7C700DF", "#0091009E"),
   main = NULL
@@ -21,6 +22,8 @@ decomplot(
 
 \item{ref}{A logical or numeric vector identifying the reference row positions.}
 
+\item{log}{A logical indicating whether the data must be log transformed.}
+
 \item{fill}{Fill color of the boxplots.}
 
 \item{border}{Border color of the boxplots.}
@@ -28,7 +31,7 @@ decomplot(
 \item{main}{Main title of the plot.}
 }
 \value{
-A boxplot of length \code{g} representing the variations in the different MUMARINEX sub-indices (CSR, CBCD, and CPI).
+A boxplot of length \code{g} representing the variations in the different MUMARINEX sub-indices (SCSR, CBCS, and SPI).
 }
 \description{
 Generates a graphical representation (boxplot) of MUMARINEX sub-indices to assess which component(s) contribute most strongly to the overall MUMARINEX score.
@@ -39,9 +42,9 @@ and representation as boxplots
 }
 \examples{
 data("Simulated_data")
-ref_idx<-41:50
+ref_idx<-1:10
 stations<-matrix(unlist(strsplit(rownames(Simulated_data),".",fixed=TRUE)),ncol=2,byrow=TRUE)[,1]
-decomplot(x=Simulated_data,g=stations,ref=ref_idx,main="Simulated data")
+decomplot(x=Simulated_data,g=stations,ref=ref_idx,log=FALSE,main="Simulated data")
 }
 \seealso{
 \code{\link[=diagnostic_tool]{diagnostic_tool()}}
